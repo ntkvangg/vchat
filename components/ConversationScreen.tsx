@@ -16,6 +16,7 @@ import MoodIcon from '@mui/icons-material/Mood';
 import { addDoc, collection, doc, serverTimestamp, setDoc } from 'firebase/firestore';
 import { auth, db } from '../config/firebase';
 import { useAuthState } from 'react-firebase-hooks/auth';
+import PhotoOutlinedIcon from '@mui/icons-material/PhotoOutlined';
 
 
 const StyleRecipientHeader = styled.div`
@@ -204,7 +205,7 @@ const ConversationScreen = ({conversation, messages}: {conversation: Conversatio
                     <SendIcon/>
                 </IconButton>
                 <IconButton>
-                    <MicIcon/>
+                    <PhotoOutlinedIcon/>
                 </IconButton>
             </StyledInputContainer>
         </>
