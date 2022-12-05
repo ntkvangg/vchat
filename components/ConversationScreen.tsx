@@ -1,8 +1,8 @@
 import IconButton from '@mui/material/IconButton';
-import React, { KeyboardEventHandler, useRef, useState } from 'react'
+import React, { KeyboardEventHandler, useEffect, useRef, useState } from 'react'
 import styled from 'styled-components';
 import { useRecipient } from '../hooks/useRecipent';
-import { Conversation, IMessage } from '../types/index';
+import { AppUser, Conversation, IMessage } from '../types/index';
 import { convertFirestoreTimestampToString, generateQueryGetMessageConversation, transforMessage } from '../utils/getRecipentEmail';
 import { RecipientAvatar } from './RecipientAvatar';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
@@ -17,6 +17,12 @@ import { addDoc, collection, doc, serverTimestamp, setDoc } from 'firebase/fires
 import { auth, db } from '../config/firebase';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import PhotoOutlinedIcon from '@mui/icons-material/PhotoOutlined';
+import { Avatar } from '@mui/material';
+import {getStorage, ref} from 'firebase/storage';
+
+interface File {
+    name: String;
+}
 
 
 const StyleRecipientHeader = styled.div`
@@ -92,11 +98,16 @@ const StyledInput = styled.input`
     margin-right: 15px;
 `
 
+const StyledAvatar = styled(Avatar)`
+
+`
+
 const ConversationScreen = ({conversation, messages}: {conversation: Conversation; messages: IMessage[]}) => {
     const [loggedInUser, _loading, _error] = useAuthState(auth);
     const conversationUsers  =  conversation.users;
     const {recipient, recipientEmail} = useRecipient(conversationUsers);
     const [newMessage, setNewMessage] = useState("");
+    const [selectedFile, setSelectedFile] = useState(null);
 
     const router = useRouter()
     const conversationId = router.query.id;
@@ -109,6 +120,11 @@ const ConversationScreen = ({conversation, messages}: {conversation: Conversatio
         }
     }
 
+    const onChangeFileUpload = (e: any)=>{
+        setSelectedFile(e.target.files[0] || undefined);
+        console.log(e.target.files[0]);
+    }
+
     const onClickSendMessage = ()=>{
         if(!newMessage)return
         if(newMessage){
@@ -119,11 +135,14 @@ const ConversationScreen = ({conversation, messages}: {conversation: Conversatio
     const endOfMessageRef = useRef<HTMLDivElement>(null)
 
     const scrollToBottom = ()=>{
-        endOfMessageRef.current?.scrollIntoView({behavior: 'smooth'});
-
+        console.log(messages);
+        if(messages && messages.length){
+            endOfMessageRef.current?.scrollIntoView({behavior: 'smooth'});    
+        }
     }
 
     const addMessageToDbAndUpdateLastSeen = async()=>{
+        const storage = getStorage();
         await setDoc(doc(db, 'users', loggedInUser?.email as string), {
             email: loggedInUser?.email,
             lastSeen: serverTimestamp(),
@@ -147,7 +166,6 @@ const ConversationScreen = ({conversation, messages}: {conversation: Conversatio
     const [messagesSnapshot, messagesLoading, error]  = useCollection(queryGetMessages);
 
     const handleSendNewMessage = (e: any)=>{
-        // addMessageToDbAndUpdateLastSeen();
         
         if (e.key === 'Enter') {
             console.log("sendNewMessage");
@@ -160,18 +178,18 @@ const ConversationScreen = ({conversation, messages}: {conversation: Conversatio
 
         //if front-end loading messages behind the screen, display messages
         if(messagesLoading){
-            return messages.map((message, index)=> <SingleMessage key={message.id} message={message}/>);
+            return messages.map((message, index)=> <SingleMessage key={message.id} message={message} conversation={conversation} />);
         }
         //If front-end finished loadding message
         if(messagesSnapshot){
-            return messagesSnapshot.docs.map((message, index)=><SingleMessage key={message.id} message={transforMessage(message)}/>)
+            return messagesSnapshot.docs.map((message, index)=><SingleMessage key={message.id} message={transforMessage(message)} conversation={conversation}/>)
             
         }
     }
 
-    // useEffect(()=>{
-
-    // })
+    useEffect(()=>{
+        scrollToBottom();
+    }, [conversationId])
     
     return (
         <>
@@ -204,7 +222,8 @@ const ConversationScreen = ({conversation, messages}: {conversation: Conversatio
                 <IconButton onClick={onClickSendMessage}>
                     <SendIcon/>
                 </IconButton>
-                <IconButton>
+                <IconButton aria-label="upload file" component="label">
+                    <input hidden type="file" name="file" onChange={(e)=>onChangeFileUpload(e)}/>
                     <PhotoOutlinedIcon/>
                 </IconButton>
             </StyledInputContainer>

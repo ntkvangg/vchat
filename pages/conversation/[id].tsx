@@ -25,23 +25,36 @@ const StyledConversationContainer = styled.div`
     flex-grow: 1;
     height: 100vh;
     overflow-y: scroll;
-    cursor: pointer;
-
-    /* Hide scrollbar for Chrome, Safari and Opera */
-    ::-webkit-scrollbar {
-        display: none;
+     /* width */
+     ::-webkit-scrollbar {
+        width: 5px;
+    
     }
 
-    /* Hide scrollbar for IE, Edge and Firefox */
+    /* Track */
+    ::-webkit-scrollbar-track {
+        background: #f1f1f1; 
+    
+    }
+    
+    /* Handle */
+    ::-webkit-scrollbar-thumb {
+        background: #888; 
+        border-radius: 16px
+    }
 
-    -ms-overflow-style: none;  /* IE and Edge */
-    scrollbar-width: none;  /* Firefox */
+    /* Handle on hover */
+    ::-webkit-scrollbar-thumb:hover {
+        background: #555; 
+    }
 
     
     
 `
 
 const ConversationChat = ({conversation, messages}: Props) => {
+
+    console.log(messages);
 
     const [loggedInUser, loading, error] = useAuthState(auth);
     // const {recipient, recipientEmail} = useRecipient()

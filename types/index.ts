@@ -16,5 +16,6 @@ export interface IMessage{
     conversation_id: string,
     send_at: string,
     user: string,
-    text: string
+    text: string,
+    file: String
 }

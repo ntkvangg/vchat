@@ -10,6 +10,7 @@ const StyledContainer = styled.div`
     padding: 10px;
     cursor: pointer;
     word-break: break-all;
+    border-bottom: 1px solid #eee;
     justify-content: 'space-around';
 
     :hover{

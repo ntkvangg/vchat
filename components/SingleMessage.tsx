@@ -1,7 +1,9 @@
+import { Avatar } from "@mui/material";
 import { useAuthState } from "react-firebase-hooks/auth";
 import styled from "styled-components";
 import { auth } from "../config/firebase";
-import {IMessage} from "../types";
+import { useRecipient } from "../hooks/useRecipent";
+import {Conversation, IMessage} from "../types";
 
 const StyledMessage = styled.p`
     word-break: break-all;
@@ -15,8 +17,20 @@ const StyledMessage = styled.p`
 
 `
 
+const StyledSendMessageWrapper = styled.div`
+    display: flex;
+    justify-content: flex-end;
+    padding-right: 5px;
+    
+`
+
+const StyledReciveMessageWrapper = styled.div`
+    display: flex;
+    padding-left: 5px;
+    
+`
+
 const StyledSenderMessage = styled(StyledMessage)`
-    margin-left: auto;
     background-color: #cdf8c6;
 
 `
@@ -34,19 +48,47 @@ const StyledTimestamp = styled.span`
     right: 0;
     text-align: right;
 
-
 `
 
-const SingleMessage = ({message}: {message: IMessage}) => {
+const SingleMessage = ({message, conversation}: {message: IMessage, conversation: Conversation}) => {
     const [loggedInUer, loading, error] = useAuthState(auth);
+    const conversationUser = conversation.users;
+    const {recipient, recipientEmail} = useRecipient(conversationUser);
 
-    const MessageType = loggedInUer?.email === message.user ? StyledSenderMessage : StyledReciveMessage;
+    // const MessageType = loggedInUer?.email === message.user ? StyledSenderMessage : StyledReciveMessage;
+
+    
 
     return (
-        <MessageType>
-            {message.text}
-            <StyledTimestamp>{message.send_at}</StyledTimestamp>
-        </MessageType>
+        // <StyledMessageWrapper>
+        //     <MessageType>
+        //         {message.text}
+        //         <StyledTimestamp>{message.send_at}</StyledTimestamp>
+        //     </MessageType>
+        // </StyledMessageWrapper>
+       <>
+            {
+                loggedInUer?.email === message.user ? 
+                <StyledSendMessageWrapper style={{justifyContent: 'flex-end'}}>
+                    
+                    <StyledSenderMessage>
+                        {message.text}
+                        <StyledTimestamp>{message.send_at}</StyledTimestamp>
+                    </StyledSenderMessage>
+                    <Avatar src={loggedInUer?.photoURL || ''}/>
+                </StyledSendMessageWrapper>
+                :
+                <StyledReciveMessageWrapper>
+                    <Avatar src={recipient?.photoURL}/>
+                    <StyledReciveMessage>
+                        {message.text}
+                        <StyledTimestamp>{message.send_at}</StyledTimestamp>
+                    </StyledReciveMessage>
+                    
+                </StyledReciveMessageWrapper>
+            
+            }
+       </>
     );
 }
 
