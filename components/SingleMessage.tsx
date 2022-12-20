@@ -16,7 +16,7 @@ import wordIcon from "../assets/icon/word.png";
 import { getStorage, getDownloadURL, ref } from 'firebase/storage';
 import ReactPlayer from "react-player";
 
-const StyledMessage = styled.p`
+const StyledMessage = styled.div`
     word-break: break-all;
     width: fit-content;
     max-width: 90%;
