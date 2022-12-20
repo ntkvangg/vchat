@@ -53,11 +53,7 @@ const StyledConversationContainer = styled.div`
 `
 
 const ConversationChat = ({conversation, messages}: Props) => {
-
-    console.log(messages);
-
     const [loggedInUser, loading, error] = useAuthState(auth);
-    // const {recipient, recipientEmail} = useRecipient()
     return (
         <StyledContainer>
             <Head>
@@ -67,7 +63,6 @@ const ConversationChat = ({conversation, messages}: Props) => {
             <StyledConversationContainer>
                 <ConversationScreen conversation={conversation} messages={messages}/>
             </StyledConversationContainer>
-            {/* {messages.map((message, index) => <p key={index}>{JSON.stringify(message)}</p>)} */}
         </StyledContainer>
     )
 }

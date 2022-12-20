@@ -6,6 +6,8 @@ import { auth, db } from '../config/firebase';
 import Loading from '../components/Loading';
 import { useEffect } from 'react';
 import { doc, serverTimestamp, setDoc } from 'firebase/firestore';
+import { Roboto } from '@next/font/google';
+
 
 export default function App({ Component, pageProps }: AppProps) {
   const [loggedInUser, loading, error] = useAuthState(auth);

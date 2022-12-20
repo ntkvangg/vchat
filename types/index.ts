@@ -17,5 +17,9 @@ export interface IMessage{
     send_at: string,
     user: string,
     text: string,
-    file: String
+    file: {
+        url: any,
+        type: String,
+        name: any
+    }
 }

@@ -71,10 +71,7 @@ const StyledUserAvater = styled(Avatar)`
     }
 `;
 
-const StyleConversationWrapper = styled.div`
-    
 
-`
 
 const StyledWarapperAction = styled.div`
     /* position: sticky;
@@ -87,7 +84,7 @@ const Sidebar = () => {
         try{
             await signOut(auth);
         }catch(err){
-            console.log(err);
+            
         }
     }
     const [loggedInUser, loading, error] = useAuthState(auth);
@@ -128,7 +125,6 @@ const Sidebar = () => {
         if(EmailValidator.validate(recipientEmail) && !isInviteMySelf && !isConversationAlreadyExist(recipientEmail as string)){
             // add conversation user to db 'conversation' collection
             // a conversation is between currently user and logged in user
-            console.log("add users");
             try{
                 await addDoc(collection(db, 'conversation'), {
                     users: [loggedInUser?.email, recipientEmail] 
@@ -173,14 +169,14 @@ const Sidebar = () => {
         </StyledWarapperAction>
         
         
-        <StyleConversationWrapper>
-            {conversationSnapshot?.docs.map(conversation=> 
-                <ConversationSelect 
-                    key={conversation.id} 
-                    id={conversation.id} 
-                    conversationUsers={(conversation.data() as Conversation).users} />)
-            }
-        </StyleConversationWrapper>
+        
+        {conversationSnapshot?.docs.map(conversation=> 
+            <ConversationSelect 
+                key={conversation.id} 
+                id={conversation.id}
+                conversationUsers={(conversation.data() as Conversation).users} />)
+        }
+        
             {/*Start dialog */}
             <Dialog open={isOpenNewConversationDialog} onClose={closeleNewConversation}>
                 <DialogTitle>New conversation</DialogTitle>

@@ -3,18 +3,25 @@ import styled from 'styled-components';
 import { useRecipient } from '../hooks/useRecipent';
 import {Conversation} from '../types';
 import { RecipientAvatar } from './RecipientAvatar';
+import Box from '@mui/material/Box';
+
 
 const StyledContainer = styled.div`
     display: flex;
     align-items: center;
-    padding: 10px;
+    padding: 5px;
     cursor: pointer;
     word-break: break-all;
-    border-bottom: 1px solid #eee;
+    margin-right: 10px;
     justify-content: 'space-around';
 
     :hover{
-        background-color: #e9eaeb;
+        background-color: #d7dae7;
+        border-radius: 5px;
+    }
+    &.active{
+        background-color: #E4E6EF;
+        border-radius: 5px;
     }
 `
 
@@ -22,12 +29,13 @@ const ConversationSelect = ({id, conversationUsers} : { id: string, conversation
 
     const {recipient, recipientEmail} = useRecipient(conversationUsers);
     const router = useRouter();
+    const conversationId = router.query.id;
     const onSelectConversation = ()=>{
-        router.push(`/conversation/${id}`)
+        router.push(`/conversation/${id}`);
     }
 
     return (
-        <StyledContainer onClick={onSelectConversation}>
+        <StyledContainer onClick={onSelectConversation} className={conversationId === id ? 'active': ''}>
             <RecipientAvatar recipient={recipient} recipientEmail={recipientEmail}/>
             <p>{recipientEmail}</p>
         </StyledContainer>

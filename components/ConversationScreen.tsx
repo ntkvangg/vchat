@@ -14,11 +14,12 @@ import SendIcon from '@mui/icons-material/Send';
 import MicIcon from '@mui/icons-material/Mic';
 import MoodIcon from '@mui/icons-material/Mood';
 import { addDoc, collection, doc, serverTimestamp, setDoc } from 'firebase/firestore';
-import { auth, db } from '../config/firebase';
+import { auth, db, storage } from '../config/firebase';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import PhotoOutlinedIcon from '@mui/icons-material/PhotoOutlined';
 import { Avatar } from '@mui/material';
-import {getStorage, ref} from 'firebase/storage';
+import {getDownloadURL, getStorage, ref, uploadBytes, uploadBytesResumable} from 'firebase/storage';
+import EmojiPicker from 'emoji-picker-react';
 
 interface File {
     name: String;
@@ -108,6 +109,7 @@ const ConversationScreen = ({conversation, messages}: {conversation: Conversatio
     const {recipient, recipientEmail} = useRecipient(conversationUsers);
     const [newMessage, setNewMessage] = useState("");
     const [selectedFile, setSelectedFile] = useState(null);
+    const [isOpenEmotion, setIsOpenEmotion] = useState(false);
 
     const router = useRouter()
     const conversationId = router.query.id;
@@ -121,9 +123,54 @@ const ConversationScreen = ({conversation, messages}: {conversation: Conversatio
     }
 
     const onChangeFileUpload = (e: any)=>{
-        setSelectedFile(e.target.files[0] || undefined);
-        console.log(e.target.files[0]);
+        if(!(e.target.files && e.target.files[0])) return;
+
+        const storageRef = ref(storage, `files/${e.target.files[0].name}`);
+        
+        // Upload the file and metadata
+        const uploadTask = uploadBytesResumable(storageRef, e.target.files[0]);
+
+        uploadTask.on('state_changed', (snapshot)=>{
+            const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+            switch (snapshot.state) {
+            case 'paused':
+                
+                break;
+            case 'running':
+                
+                break;
+            }
+        },(error)=>{
+            // Handle unsuccessful uploads
+        },()=>{
+            // Handle successful uploads on complete
+            // For instance, get the download URL: https://firebasestorage.googleapis.com/...
+            getDownloadURL(uploadTask.snapshot.ref).then( async (downloadURL) => {
+                await setDoc(doc(db, 'users', loggedInUser?.email as string), {
+                    email: loggedInUser?.email,
+                    lastSeen: serverTimestamp(),
+                    photoURL: loggedInUser?.photoURL,
+                }, {merge: true})
+        
+                await addDoc(collection(db, 'messages'), {
+                    conversation_id: conversationId,
+                    send_at: serverTimestamp(),
+                    text: newMessage,
+                    user: loggedInUser?.email,
+                    file:{
+                        url: downloadURL,
+                        name: e.target.files[0].name,
+                        type: e.target.files[0].type
+                    }
+                })  
+                
+            });
+        })
+        setNewMessage("");
+        
+        scrollToBottom();
     }
+  
 
     const onClickSendMessage = ()=>{
         if(!newMessage)return
@@ -132,17 +179,16 @@ const ConversationScreen = ({conversation, messages}: {conversation: Conversatio
         }
     }
 
+   
     const endOfMessageRef = useRef<HTMLDivElement>(null)
 
     const scrollToBottom = ()=>{
-        console.log(messages);
         if(messages && messages.length){
             endOfMessageRef.current?.scrollIntoView({behavior: 'smooth'});    
         }
     }
 
     const addMessageToDbAndUpdateLastSeen = async()=>{
-        const storage = getStorage();
         await setDoc(doc(db, 'users', loggedInUser?.email as string), {
             email: loggedInUser?.email,
             lastSeen: serverTimestamp(),
@@ -165,13 +211,6 @@ const ConversationScreen = ({conversation, messages}: {conversation: Conversatio
 
     const [messagesSnapshot, messagesLoading, error]  = useCollection(queryGetMessages);
 
-    const handleSendNewMessage = (e: any)=>{
-        
-        if (e.key === 'Enter') {
-            console.log("sendNewMessage");
-            e.preventDefault();
-        }
-    }
 
 
     const showMessages = ()=>{
@@ -215,7 +254,7 @@ const ConversationScreen = ({conversation, messages}: {conversation: Conversatio
                 <EndOfMessageForAutoScroll ref={endOfMessageRef}/>
             </StyledMessageContainer>
             <StyledInputContainer>
-                <IconButton>
+                <IconButton onClick={()=>setIsOpenEmotion(!isOpenEmotion)}>
                     <MoodIcon/>
                 </IconButton>
                 <StyledInput value={newMessage} onChange={(e)=> setNewMessage(e.target.value)} onKeyDown={sendMessageEnter}/>
@@ -227,6 +266,8 @@ const ConversationScreen = ({conversation, messages}: {conversation: Conversatio
                     <PhotoOutlinedIcon/>
                 </IconButton>
             </StyledInputContainer>
+            {isOpenEmotion ? <EmojiPicker/> : null}
+            
         </>
 
     )
