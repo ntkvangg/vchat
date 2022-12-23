@@ -20,6 +20,7 @@ import PhotoOutlinedIcon from '@mui/icons-material/PhotoOutlined';
 import { Avatar } from '@mui/material';
 import {getDownloadURL, getStorage, ref, uploadBytes, uploadBytesResumable} from 'firebase/storage';
 import EmojiPicker from 'emoji-picker-react';
+import FilterIcon from '@mui/icons-material/Filter';
 
 interface File {
     name: String;
@@ -33,7 +34,7 @@ const StyleRecipientHeader = styled.div`
     align-items: center;
     background-color: #fff;
     padding: 8px;
-    height: 80px;
+    height: 55px;
     border-bottom: 1px solid #eee;
     z-index: 100;
 
@@ -107,7 +108,7 @@ const ConversationScreen = ({conversation, messages}: {conversation: Conversatio
     const [loggedInUser, _loading, _error] = useAuthState(auth);
     const conversationUsers  =  conversation.users;
     const {recipient, recipientEmail} = useRecipient(conversationUsers);
-    const [newMessage, setNewMessage] = useState("");
+    const [newMessage, setNewMessage] = useState("");   
     const [selectedFile, setSelectedFile] = useState(null);
     const [isOpenEmotion, setIsOpenEmotion] = useState(false);
 
@@ -246,6 +247,9 @@ const ConversationScreen = ({conversation, messages}: {conversation: Conversatio
                         </IconButton>
                         <IconButton>
                             <MoreVertIcon/>
+                        </IconButton>
+                        <IconButton>
+                            <FilterIcon/>
                         </IconButton>
                 </StyleHeaderIcons>
             </StyleRecipientHeader>

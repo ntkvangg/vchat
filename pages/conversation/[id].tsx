@@ -21,6 +21,14 @@ const StyledContainer = styled.div`
 
 `
 
+const StyledRightMenuContainer = styled.div`
+    display: flex;
+    justify-content: flex-end;
+    max-width: 200px;
+    min-width:200px;
+
+`
+
 const StyledConversationContainer = styled.div`
     flex-grow: 1;
     height: 100vh;
@@ -63,6 +71,7 @@ const ConversationChat = ({conversation, messages}: Props) => {
             <StyledConversationContainer>
                 <ConversationScreen conversation={conversation} messages={messages}/>
             </StyledConversationContainer>
+            
         </StyledContainer>
     )
 }

@@ -135,6 +135,10 @@ const Sidebar = () => {
         closeleNewConversation();
     }
 
+    const searchContactConversation = (e: any)=>{
+        console.log(e.target.value);
+    }
+
     return (
 
     <StyledContainer>
@@ -158,7 +162,7 @@ const Sidebar = () => {
         <StyledWarapperAction>
             <StyledSearch>
                 <SearchIcon/>
-                <StyledSearchInput>
+                <StyledSearchInput onChange={(e)=>searchContactConversation(e)}>
                     
                 </StyledSearchInput>
                     
@@ -170,7 +174,8 @@ const Sidebar = () => {
         
         
         
-        {conversationSnapshot?.docs.map(conversation=> 
+        {
+            conversationSnapshot?.docs.map(conversation=> 
             <ConversationSelect 
                 key={conversation.id} 
                 id={conversation.id}
