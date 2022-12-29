@@ -83,7 +83,11 @@ const SingleMessage = ({message, conversation}: {message: IMessage, conversation
 
     const checkTypeFile = (type: String)=>{
         if(!type) return false;
-        return type.indexOf('image') !== -1;
+        return type.indexOf('image') !== -1 || type === "image/jpeg";
+    }
+
+    const loaderImage = (url: string)=>{
+        return url;
     }
 
     const fileClassification = (type: String)=>{
@@ -228,19 +232,20 @@ const SingleMessage = ({message, conversation}: {message: IMessage, conversation
                             </StyledTimestamp>
                         </StyledReciveMessage>:
                         message.file.type && checkTypeFile(message.file.type) ?
-                            <StyledMediaWrapper> 
-                                <Image src={message.file.url || ''} alt={message.file.name} height="210"/>
-                            </StyledMediaWrapper>
+                        <StyledMediaWrapper> 
+                            <CardMedia component="img" image={message.file.url || ''} alt={message.file.name || ''} height="210" id="imgMessage"/>
+                                <CardActions sx={{justifyContent: 'flex-end', padding: '5px'}}>
+                                    <IconButton onClick={()=>downloadImage(message.file.name)}> <DownloadOutlinedIcon/></IconButton>
+                                </CardActions>
+                        </StyledMediaWrapper>
                         :
-                        <StyledFileWrapper>
+                        <StyledFileWrapper sx={{backgroundColor: '#ddecfa'}}>
                             {fileClassification(message.file.type)}
                             {message.file.name}
                             <IconButton aria-label="download" onClick={()=>downloadFile(message.file.name)}> <DownloadOutlinedIcon/> </IconButton>
                         </StyledFileWrapper>
 
                     }
-                    
-                    
                 </StyledReciveMessageWrapper>
             
             }

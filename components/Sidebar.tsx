@@ -19,6 +19,7 @@ const StyledContainer = styled.div`
     height: 100vh;
     min-width: 300px;
     max-width: 350px;
+    border-right: 1px solid #eee;
     
     overflow-y: scroll;
 
