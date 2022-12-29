@@ -74,7 +74,7 @@ const StyledMessageContainer = styled.div`
         
 `
 
-const StyledInputContainer = styled.form`
+const StyledInputContainer = styled.div`
     display: flex;
     align-items: center;    
     position: sticky;
