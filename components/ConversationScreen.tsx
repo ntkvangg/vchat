@@ -17,7 +17,7 @@ import { addDoc, collection, doc, serverTimestamp, setDoc } from 'firebase/fires
 import { auth, db, storage } from '../config/firebase';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import PhotoOutlinedIcon from '@mui/icons-material/PhotoOutlined';
-import { Avatar } from '@mui/material';
+import { Avatar, Card, OutlinedInput, FormControl } from '@mui/material';
 import {getDownloadURL, getStorage, ref, uploadBytes, uploadBytesResumable} from 'firebase/storage';
 import EmojiPicker from 'emoji-picker-react';
 import FilterIcon from '@mui/icons-material/Filter';
@@ -33,9 +33,7 @@ const StyleRecipientHeader = styled.div`
     top: 0;
     align-items: center;
     background-color: #fff;
-    padding: 8px;
-    height: 55px;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1.2px solid #d8d8d8;
     z-index: 100;
 
 `
@@ -44,19 +42,31 @@ const StyledHeaderInfo = styled.div`
     margin: 5px;
     flex-grow: 1;
 
-    >h3{
-        margin-top: 0;
-        margin-bottom: 3px;
+    & p{
+        word-break: break-all;
+        margin: 0px;
+        font-family: Inter, sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+        line-height: 1.5;
+        letter-spacing: 0.15px;
+        color: rgba(58, 53, 65, 0.87);
+        font-weight: 700;
+        font-size: 0.875rem;
     }
-    >span{
-        font-size: 14px;
-        color: gray
+    & span{
+        margin: 0px;
+        font-family: Inter, sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+        font-weight: 400;
+        font-size: 0.75rem;
+        line-height: 1.66;
+        letter-spacing: 0.4px;
+        color: rgba(58, 53, 65, 0.38);
     }
 
 `
 
-const StyledH3 = styled.h3`
-    word-break: break-all;
+const StyledH3 = styled.p`
+    
+
 `
 
 const StyleHeaderIcons = styled.div`
@@ -65,7 +75,7 @@ const StyleHeaderIcons = styled.div`
 
 const StyledMessageContainer = styled.div`
     padding: 3px;
-    background-color: #e5dedf;
+    background-color: #f7f7f8;
     min-height: 90%;
 
     
@@ -74,12 +84,11 @@ const StyledMessageContainer = styled.div`
         
 `
 
-const StyledInputContainer = styled.div`
+const StyledFooterChatContainer = styled(Card)`
     display: flex;
     align-items: center;    
     position: sticky;
     bottom: 0;
-    background-color: #fff;
     z-index: 100;
     
 `
@@ -88,16 +97,20 @@ const EndOfMessageForAutoScroll = styled.div`
     margin-bottom: 30px;
 `
 
-const StyledInput = styled.input`
-    flex-grow: 1;
+const StyledInput = styled(OutlinedInput)`
+    /* flex-grow: 1;
     border: none;
     outline: none;
-    border-radius: 10px;
     background-color: #fff;
-    border-radius: 10px;
-    padding: 15px;
-    margin-left: 15px;
-    margin-right: 15px;
+    margin: 0; */
+    & input{
+      padding:10px 14px 10px 0px;
+
+    }
+
+    &.inputSearch .css-1d3z3hw-MuiOutlinedInput-notchedOutline{
+        border: none
+    }
 `
 
 const StyledAvatar = styled(Avatar)`
@@ -111,6 +124,8 @@ const ConversationScreen = ({conversation, messages}: {conversation: Conversatio
     const [newMessage, setNewMessage] = useState("");   
     const [selectedFile, setSelectedFile] = useState(null);
     const [isOpenEmotion, setIsOpenEmotion] = useState(false);
+    const [emojies, setEmojies] = useState(Array<any>([]));
+    let icons: any[] = [];
 
     const router = useRouter()
     const conversationId = router.query.id;
@@ -190,6 +205,7 @@ const ConversationScreen = ({conversation, messages}: {conversation: Conversatio
     }
 
     const addMessageToDbAndUpdateLastSeen = async()=>{
+        
         await setDoc(doc(db, 'users', loggedInUser?.email as string), {
             email: loggedInUser?.email,
             lastSeen: serverTimestamp(),
@@ -204,7 +220,8 @@ const ConversationScreen = ({conversation, messages}: {conversation: Conversatio
         })
 
         setNewMessage("");
-
+        setIsOpenEmotion(false);
+        setEmojies([]);
         scrollToBottom();
     }
 
@@ -225,6 +242,12 @@ const ConversationScreen = ({conversation, messages}: {conversation: Conversatio
             return messagesSnapshot.docs.map((message, index)=><SingleMessage key={message.id} message={transforMessage(message)} conversation={conversation}/>)
             
         }
+    }
+
+    const onEmojiClick = (emojiObject: any)=> {
+        emojies.push(emojiObject.emoji);
+        setNewMessage(emojies.join(' '));
+        
     }
 
     useEffect(()=>{
@@ -257,20 +280,24 @@ const ConversationScreen = ({conversation, messages}: {conversation: Conversatio
                 {showMessages()}
                 <EndOfMessageForAutoScroll ref={endOfMessageRef}/>
             </StyledMessageContainer>
-            <StyledInputContainer>
+            <StyledFooterChatContainer>
                 <IconButton onClick={()=>setIsOpenEmotion(!isOpenEmotion)}>
                     <MoodIcon/>
                 </IconButton>
-                <StyledInput value={newMessage} onChange={(e)=> setNewMessage(e.target.value)} onKeyDown={sendMessageEnter}/>
-                <IconButton onClick={onClickSendMessage}>
-                    <SendIcon/>
-                </IconButton>
-                <IconButton aria-label="upload file" component="label">
-                    <input hidden type="file" name="file" onChange={(e)=>onChangeFileUpload(e)}/>
-                    <PhotoOutlinedIcon/>
-                </IconButton>
-            </StyledInputContainer>
-            {isOpenEmotion ? <EmojiPicker/> : null}
+                <FormControl sx={{width: '100%'}}>
+                    <StyledInput className='inputSearch' placeholder='Type your message here...' value={newMessage} onChange={(e)=> setNewMessage(e.target.value)} onKeyDown={sendMessageEnter}/>
+                </FormControl>
+                    <IconButton onClick={onClickSendMessage}>
+                        <SendIcon/>
+                    </IconButton>
+                    <IconButton aria-label="upload file" component="label">
+                        <input hidden type="file" name="file" onChange={(e)=>onChangeFileUpload(e)}/>
+                        <PhotoOutlinedIcon/>
+                    </IconButton>
+                
+                
+            </StyledFooterChatContainer>
+            {isOpenEmotion ? <EmojiPicker onEmojiClick={(emojiObject)=>onEmojiClick(emojiObject)}/> : null}
             
         </>
 

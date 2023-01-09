@@ -1,4 +1,4 @@
-import { Avatar, IconButton, Tooltip, Input, FormControl, Button, Dialog, DialogTitle, DialogContent, DialogContentText, TextField, DialogActions } from "@mui/material";
+import { Avatar, IconButton, Tooltip, Input, FormControl, Button, Dialog, DialogTitle, DialogContent, DialogContentText, TextField, DialogActions, OutlinedInput, InputAdornment } from "@mui/material";
 import ChatIcon from "@mui/icons-material/Chat";
 import LogoutIcon from "@mui/icons-material/Logout";
 import MoreVerticalIcon from "@mui/icons-material/MoreVert";
@@ -19,7 +19,7 @@ const StyledContainer = styled.div`
     height: 100vh;
     min-width: 300px;
     max-width: 350px;
-    border-right: 1px solid #eee;
+    border-right: 1.2px solid #d8d8d8;
     
     overflow-y: scroll;
 
@@ -43,26 +43,27 @@ const StyleHeader = styled.div`
     top: 0;
     justify-content: space-between;
     align-items: center;
-    padding: 15px;
-    height: 80px;
+    padding: 0.475rem 1.25rem;
     background-color: #fff;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1.2px solid #d8d8d8;
 `;
 const StyledSearch = styled.div`
     display: flex;
     align-items: center;
-    padding: 15px;
+    margin-top: 1em;
 `;
-const StyledSearchInput = styled.input`
-    outline: none;
-    border: none;
-    flex: 1;
+const StyledSearchInput = styled(FormControl)`
+    width: 100%;
+    & .outlinedInputSearch{
+        border-radius: 30px;
+    }
+    & input{
+        padding:8.5px 14px 8.5px 0px;
+    }
 
 `
 const StyledSidebarButton = styled(Button)`
     width: 100%;
-    border-top: 1px solid whitesmoke;
-    border-bottom: 1px solid whitesmoke;
 `;
 
 const StyledUserAvater = styled(Avatar)`
@@ -75,10 +76,7 @@ const StyledUserAvater = styled(Avatar)`
 
 
 const StyledWarapperAction = styled.div`
-    /* position: sticky;
-    z-index: 100;
-    top: 80px; */
-    /* background-color: #eee; */
+   padding: 0.78125rem 1.25rem;
 `
 const Sidebar = () => {
     const logout = async() => {
@@ -93,6 +91,8 @@ const Sidebar = () => {
     const [isOpenNewConversationDialog, setIsOpenNewConversationDialog] = useState(false);
     const isInviteMySelf = loggedInUser?.email === recipientEmail;
     const [isValidDialogConversation, setIsValidDialogConversation] = useState(false);
+    const [searchContact, setSearchContact] = useState("");
+    const [contacts, setContacts] = useState([]);
     const openToggleNewConversation = (isOpen: boolean) => {
         setIsOpenNewConversationDialog(isOpen);
             if(!isOpen) setRecipientEmail("")           
@@ -137,7 +137,9 @@ const Sidebar = () => {
     }
 
     const searchContactConversation = (e: any)=>{
-        console.log(e.target.value);
+        setSearchContact(e.target.value);
+        const result  = conversationSnapshot?.docs.filter(conversation => (conversation.data() as Conversation).users.indexOf(e.target.value));
+        
     }
 
     return (
@@ -148,34 +150,29 @@ const Sidebar = () => {
                 <StyledUserAvater color="default" src={loggedInUser?.photoURL || ''}/>
             </Tooltip>
             <div>
-                <IconButton>
-                    <ChatIcon/>
-                </IconButton>
-                <IconButton>
-                    <MoreVerticalIcon/>
-                </IconButton>
                 <IconButton onClick={logout}>
                     <LogoutIcon/>
                 </IconButton>
-                
             </div>
         </StyleHeader>
         <StyledWarapperAction>
-            <StyledSearch>
-                <SearchIcon/>
-                <StyledSearchInput onChange={(e)=>searchContactConversation(e)}>
-                    
-                </StyledSearchInput>
-                    
-            </StyledSearch>
-            <StyledSidebarButton onClick={()=>{openToggleNewConversation(true)}}>
+            <StyledSidebarButton variant="outlined" onClick={()=>{openToggleNewConversation(true)}}>
                 Start a new conversation
             </StyledSidebarButton>
+            <StyledSearch>
+                <StyledSearchInput>
+                    <OutlinedInput className="outlinedInputSearch" placeholder="Search for contact..."
+                        startAdornment={<InputAdornment position="start"><SearchIcon/></InputAdornment >}
+                        onChange={(e)=>searchContactConversation(e)}/>
+                </StyledSearchInput>
+            </StyledSearch>
+           
         </StyledWarapperAction>
         
         
         
         {
+            
             conversationSnapshot?.docs.map(conversation=> 
             <ConversationSelect 
                 key={conversation.id} 
@@ -201,8 +198,8 @@ const Sidebar = () => {
                     />
                 </DialogContent>
                 <DialogActions>
-                <Button onClick={closeleNewConversation}>Cancel</Button>
-                <Button onClick={createNewConversation} disabled={!isValidDialogConversation}>Create</Button>
+                    <Button onClick={closeleNewConversation}>Cancel</Button>
+                    <Button onClick={createNewConversation} disabled={!isValidDialogConversation}>Create</Button>
                 </DialogActions>
             </Dialog>
             {/* End Dialog */}

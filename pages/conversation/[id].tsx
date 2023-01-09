@@ -71,7 +71,6 @@ const ConversationChat = ({conversation, messages}: Props) => {
             <StyledConversationContainer>
                 <ConversationScreen conversation={conversation} messages={messages}/>
             </StyledConversationContainer>
-            
         </StyledContainer>
     )
 }

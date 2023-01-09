@@ -1,4 +1,4 @@
-import { Avatar, Card, CardActions, CardMedia } from "@mui/material";
+import { Avatar, Box, Card, CardActions, CardMedia, Modal } from "@mui/material";
 import { useAuthState } from "react-firebase-hooks/auth";
 import styled from "styled-components";
 import { auth, storage } from "../config/firebase";
@@ -15,16 +15,24 @@ import pptIcon from "../assets/icon/powerpoint.png";
 import wordIcon from "../assets/icon/word.png";
 import { getStorage, getDownloadURL, ref } from 'firebase/storage';
 import ReactPlayer from "react-player";
+import { useState } from "react";
 
 const StyledMessage = styled.div`
     word-break: break-all;
     width: fit-content;
     max-width: 90%;
-    min-width: 30%;
-    padding: 15px 15px 30px;
+    min-width: 25%;
     border-radius: 8px;
     margin: 10px;
     position: relative;
+    font-family: Inter, sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    font-weight: 400;
+    line-height: 1.5;
+    letter-spacing: 0.15px;
+    box-shadow: rgb(58 53 65 / 20%) 0px 2px 1px -1px, rgb(58 53 65 / 14%) 0px 1px 1px 0px, rgb(58 53 65 / 12%) 0px 1px 3px 0px;
+    width: fit-content;
+    font-size: 0.875rem;
+    padding:0.75rem 1rem 1.5rem 1rem;
 
 `
 
@@ -42,16 +50,18 @@ const StyledReciveMessageWrapper = styled.div`
 `
 
 const StyledSenderMessage = styled(StyledMessage)`
-    background-color: #ddecfa;
-    border: 1px solid #eee;
+    color: rgb(255, 255, 255);
+    border-radius: 6px 0px 6px 6px;
+    background-color: rgb(145, 85, 253);
 `
 
 const StyledReciveMessage = styled(StyledMessage)`
     background-color: #fff;
+    border-radius: 0px 6px 6px;
 `
 
 const StyledTimestamp = styled.span`
-    color: gray;
+    color: inherit;
     padding: 10px;
     font-size: x-small;
     position: absolute;
@@ -76,10 +86,20 @@ const StyledFileWrapper = styled(StyledMediaWrapper)`
     cursor: pointer;
 `
 
+const StyledCardMedia = styled(CardMedia)`
+    :hover{
+        cursor: pointer;
+        opacity: .8;
+    }
+
+`
+
 const SingleMessage = ({message, conversation}: {message: IMessage, conversation: Conversation}) => {
     const [loggedInUer, loading, error] = useAuthState(auth);
     const conversationUser = conversation.users;
     const {recipient, recipientEmail} = useRecipient(conversationUser);
+    const [selectedImage, setSelectedIamge] = useState("");
+    const [isOpenModal, setIsOpenModal] = useState(false);
 
     const checkTypeFile = (type: String)=>{
         if(!type) return false;
@@ -184,6 +204,10 @@ const SingleMessage = ({message, conversation}: {message: IMessage, conversation
         return false;
     }
 
+    const seeImage = ()=>{
+        setIsOpenModal(!isOpenModal);
+    }
+
   
 
     
@@ -203,12 +227,12 @@ const SingleMessage = ({message, conversation}: {message: IMessage, conversation
                             <StyledTimestamp>{message.send_at}</StyledTimestamp>
                         </StyledSenderMessage> : 
                         message.file.type && checkTypeFile(message.file.type) ?
-                        <StyledMediaWrapper> 
+                        <StyledMediaWrapper onClick={seeImage}> 
                             <CardMedia component="img" image={message.file.url || ''} alt={message.file.name || ''} height="210" id="imgMessage"/>
                             <CardActions sx={{justifyContent: 'flex-end', padding: '5px'}}>
                                 <IconButton onClick={()=>downloadImage(message.file.name)}> <DownloadOutlinedIcon/></IconButton>
                             </CardActions>
-                            </StyledMediaWrapper>
+                        </StyledMediaWrapper>
                         : 
                             <StyledFileWrapper sx={{backgroundColor: '#ddecfa'}}>
                                 {fileClassification(message.file.type)}
@@ -219,7 +243,7 @@ const SingleMessage = ({message, conversation}: {message: IMessage, conversation
                     <Avatar src={loggedInUer?.photoURL || ''}/>
                 </StyledSendMessageWrapper>
                 :
-                <StyledReciveMessageWrapper>
+                <StyledReciveMessageWrapper >
                     <Avatar src={recipient?.photoURL}/>
                     { message.text ?  
                         <StyledReciveMessage>
@@ -232,7 +256,7 @@ const SingleMessage = ({message, conversation}: {message: IMessage, conversation
                             </StyledTimestamp>
                         </StyledReciveMessage>:
                         message.file.type && checkTypeFile(message.file.type) ?
-                        <StyledMediaWrapper> 
+                        <StyledMediaWrapper onClick={seeImage}> 
                             <CardMedia component="img" image={message.file.url || ''} alt={message.file.name || ''} height="210" id="imgMessage"/>
                                 <CardActions sx={{justifyContent: 'flex-end', padding: '5px'}}>
                                     <IconButton onClick={()=>downloadImage(message.file.name)}> <DownloadOutlinedIcon/></IconButton>
@@ -249,6 +273,24 @@ const SingleMessage = ({message, conversation}: {message: IMessage, conversation
                 </StyledReciveMessageWrapper>
             
             }
+
+            <Modal
+                open={isOpenModal}
+                onClose={seeImage}
+                aria-labelledby="modal-modal-title"
+                aria-describedby="modal-modal-description"
+            >
+                <Box sx={{ position: 'absolute' as 'absolute',
+                            top: '50%',
+                            left: '50%',
+                            transform: 'translate(-50%, -50%)',
+                            width: 400,
+                            bgcolor: 'background.paper',
+                            border: '2px solid #000',
+                            boxShadow: 24,
+                            p: 4}}>        
+                </Box>
+            </Modal>
        </>
     );
 }
