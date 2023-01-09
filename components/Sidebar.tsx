@@ -33,7 +33,11 @@ const StyledContainer = styled.div`
     -ms-overflow-style: none;  /* IE and Edge */
     scrollbar-width: none;  /* Firefox */
 
-   
+    @media(max-width: 768px){
+        & p {
+            display: none;
+        }
+    }
 
 
 `;
@@ -144,7 +148,7 @@ const Sidebar = () => {
 
     return (
 
-    <StyledContainer>
+    <StyledContainer className="sidebar">
         <StyleHeader>
             <Tooltip title={loggedInUser?.email as string} placement="right">
                 <StyledUserAvater color="default" src={loggedInUser?.photoURL || ''}/>

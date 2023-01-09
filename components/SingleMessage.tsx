@@ -34,6 +34,18 @@ const StyledMessage = styled.div`
     font-size: 0.875rem;
     padding:0.75rem 1rem 1.5rem 1rem;
 
+    & p{
+        margin-bottom: 1.65rem;
+    }
+
+    & .react-player{
+        padding: 1.5rem 0;
+        margin-bottom: 1rem;
+    }
+
+    
+
+
 `
 
 const StyledSendMessageWrapper = styled.div`
@@ -53,11 +65,13 @@ const StyledSenderMessage = styled(StyledMessage)`
     color: rgb(255, 255, 255);
     border-radius: 6px 0px 6px 6px;
     background-color: rgb(145, 85, 253);
+    padding: 0 1.65rem;
 `
 
 const StyledReciveMessage = styled(StyledMessage)`
     background-color: #fff;
     border-radius: 0px 6px 6px;
+    padding: 0 1.65rem;
 `
 
 const StyledTimestamp = styled.span`
@@ -220,9 +234,12 @@ const SingleMessage = ({message, conversation}: {message: IMessage, conversation
                     { message.text ? 
                         <StyledSenderMessage>
                             { checkYoutubeUrl(message.text) ? 
-                                <ReactPlayer url={message.text}/>
+                                <div className="react-player">
+                                    <ReactPlayer url={message.text}/>
+                                </div>
+                                
                                 :
-                                message.text
+                                <p>{message.text}</p>
                             }
                             <StyledTimestamp>{message.send_at}</StyledTimestamp>
                         </StyledSenderMessage> : 
@@ -247,13 +264,17 @@ const SingleMessage = ({message, conversation}: {message: IMessage, conversation
                     <Avatar src={recipient?.photoURL}/>
                     { message.text ?  
                         <StyledReciveMessage>
+                           
                             {checkYoutubeUrl(message.text) ? 
-                                <ReactPlayer url={message.text}/>
+                                <div className="react-player">
+                                    <ReactPlayer url={message.text} className="reactPlayer"/>
+                                </div>
+                                
                                 :
-                                message.text
+                                <p>{message.text}</p>
+                                
                             }
-                            <StyledTimestamp>{message.send_at} 
-                            </StyledTimestamp>
+                            <StyledTimestamp>{message.send_at}</StyledTimestamp>
                         </StyledReciveMessage>:
                         message.file.type && checkTypeFile(message.file.type) ?
                         <StyledMediaWrapper onClick={seeImage}> 
