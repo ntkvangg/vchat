@@ -108,7 +108,7 @@ const StyledInput = styled(OutlinedInput)`
 
     }
 
-    &.inputSearch .css-1d3z3hw-MuiOutlinedInput-notchedOutline{
+    &.inputSearch .MuiOutlinedInput-notchedOutline{
         border: none
     }
 `
