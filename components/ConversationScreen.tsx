@@ -287,7 +287,7 @@ const ConversationScreen = ({conversation, messages}: {conversation: Conversatio
                 <FormControl sx={{width: '100%'}}>
                     <StyledInput className='inputSearch' placeholder='Type your message here...' value={newMessage} onChange={(e)=> setNewMessage(e.target.value)} onKeyDown={sendMessageEnter}/>
                 </FormControl>
-                    <IconButton onClick={onClickSendMessage}>
+                    <IconButton onClick={onClickSendMessage} disabled={!newMessage}>
                         <SendIcon/>
                     </IconButton>
                     <IconButton aria-label="upload file" component="label">

@@ -11,4 +11,26 @@ body{
     letter-spacing: 0.15px;
     background-color: #FFF;
 }
+.back-sidebar-btn{
+  display: none;
+}
+
+@media(max-width: 480px){ 
+  .back-sidebar-btn{
+    display: block;
+  }
+  
+  .sidebar{
+    display: none;
+  }
+
+  .sidebar-mobile{
+    display: block;
+  }
+
+  .sidebar-desktop{
+    display: none
+  }
+  
+}
 

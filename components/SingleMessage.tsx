@@ -21,30 +21,16 @@ const StyledMessage = styled.div`
     word-break: break-all;
     width: fit-content;
     max-width: 90%;
-    min-width: 25%;
-    border-radius: 8px;
     margin: 10px;
     position: relative;
     font-family: Inter, sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
     font-weight: 400;
-    line-height: 1.5;
-    letter-spacing: 0.15px;
     box-shadow: rgb(58 53 65 / 20%) 0px 2px 1px -1px, rgb(58 53 65 / 14%) 0px 1px 1px 0px, rgb(58 53 65 / 12%) 0px 1px 3px 0px;
-    width: fit-content;
     font-size: 0.875rem;
-    padding:0.75rem 1rem 1.5rem 1rem;
-
     & p{
-        margin-bottom: 1.65rem;
+        margin-bottom: 0.3rem;
     }
-
-    & .react-player{
-        padding: 1.5rem 0;
-        margin-bottom: 1rem;
-    }
-
-    
-
+    padding: 0 0.5rem 0.5rem 1rem;
 
 `
 
@@ -65,20 +51,17 @@ const StyledSenderMessage = styled(StyledMessage)`
     color: rgb(255, 255, 255);
     border-radius: 6px 0px 6px 6px;
     background-color: rgb(145, 85, 253);
-    padding: 0 1.65rem;
+    
 `
 
 const StyledReciveMessage = styled(StyledMessage)`
     background-color: #fff;
     border-radius: 0px 6px 6px;
-    padding: 0 1.65rem;
 `
 
 const StyledTimestamp = styled.span`
     color: inherit;
-    padding: 10px;
     font-size: x-small;
-    position: absolute;
     bottom: 0;
     right: 0;
     text-align: right;
