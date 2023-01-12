@@ -1,7 +1,7 @@
 import { User } from "firebase/auth"
-import { collection, DocumentData, orderBy, query, QueryDocumentSnapshot, Timestamp, where } from "firebase/firestore"
+import { collection, doc, DocumentData, getDoc, orderBy, query, QueryDocumentSnapshot, Timestamp, where } from "firebase/firestore"
 import { db } from "../config/firebase"
-import { Conversation, IMessage } from "../types"
+import { AppUser, Conversation, IMessage } from "../types"
 
 export const getRecipientEmail = (conversationUser: Conversation['users'], loggedInUser?: User | null)=> conversationUser.find(userEmail=> userEmail !== loggedInUser?.email)
 
@@ -15,3 +15,18 @@ export const transforMessage = (message: QueryDocumentSnapshot<DocumentData>)=>{
 } as IMessage)}
 
 export const convertFirestoreTimestampToString = (timestamp: Timestamp)=> new Date(timestamp.toDate().getTime()).toLocaleString()
+
+export const getAccountInConversation = async(conversationUser: Conversation['users'], email: string)=>{
+    const userAccount = conversationUser.find(userEmail => userEmail === email);
+    if(userAccount){
+        const docRef = doc(db, "users", userAccount);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+            return docSnap.data() as AppUser | undefined
+        }
+    }
+    
+    return {}
+}
+
+export const getAccountEmail = (conversationUsers: Conversation['users'], userEmail: string)=> conversationUsers.find(email=>email === userEmail);

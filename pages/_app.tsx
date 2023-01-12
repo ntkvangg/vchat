@@ -4,13 +4,18 @@ import Login from './login';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth, db } from '../config/firebase';
 import Loading from '../components/Loading';
-import { useEffect } from 'react';
-import { doc, serverTimestamp, setDoc } from 'firebase/firestore';
+import { useEffect, useState } from 'react';
+import { doc, getDoc, serverTimestamp, setDoc } from 'firebase/firestore';
 import { Roboto } from '@next/font/google';
+import { useRouter } from 'next/router';
+
 
 
 export default function App({ Component, pageProps }: AppProps) {
   const [loggedInUser, loading, error] = useAuthState(auth);
+  const router = useRouter();
+  const conversationId = router.query.id;
+  const [isLoggedInConversation, setIsLoggedInConversation] = useState(loggedInUser);
 
 
   useEffect(() => {
@@ -31,14 +36,28 @@ export default function App({ Component, pageProps }: AppProps) {
       }
     }
 
+    const getDocConversation = async ()=>{
+      const docRef = doc(db, "conversation", conversationId as string);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+          setIsLoggedInConversation(docSnap.data().users.find((email: any) => email ===loggedInUser?.email));
+      }
+    }
+
     if(loggedInUser){
       setUserInDb();
     }
-  }, [loggedInUser]);
+
+    if(conversationId){
+      getDocConversation();
+    }
+
+  }, [loggedInUser, conversationId]);
+
 
   if(loading) return <Loading/>;
 
-  if(!loggedInUser) return <Login/>
+  if(!isLoggedInConversation) return <Login/>
 
   return <Component {...pageProps} />
 }

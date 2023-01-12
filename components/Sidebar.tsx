@@ -134,7 +134,8 @@ const Sidebar = () => {
                 await addDoc(collection(db, 'conversation'), {
                     users: [loggedInUser?.email, recipientEmail] 
                 })
-            }catch(error){console.log(error);}
+            }catch(error){console.log(error);
+        }
 
         }
         closeleNewConversation();

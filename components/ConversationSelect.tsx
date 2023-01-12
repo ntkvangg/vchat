@@ -4,6 +4,8 @@ import { useRecipient } from '../hooks/useRecipent';
 import {Conversation} from '../types';
 import { RecipientAvatar } from './RecipientAvatar';
 import Box from '@mui/material/Box';
+import { AvatarGroup, Badge } from '@mui/material';
+import Avatar from '@mui/material/Avatar';
 
 
 const StyledContainer = styled.div`
@@ -39,9 +41,13 @@ const StyledContainer = styled.div`
         font-size: 0.875rem;
     }
 `
+const SmallAvatar = styled(Avatar)`
+    width: 22;
+    height: 22;
+    border: 2px solid ;
+`
 
 const ConversationSelect = ({id, conversationUsers} : { id: string, conversationUsers: Conversation['users']}) => {
-
     const {recipient, recipientEmail} = useRecipient(conversationUsers);
     const router = useRouter();
     const conversationId = router.query.id;
@@ -51,8 +57,19 @@ const ConversationSelect = ({id, conversationUsers} : { id: string, conversation
 
     return (
         <StyledContainer onClick={onSelectConversation} className={conversationId === id ? 'active': ''}>
-            <RecipientAvatar recipient={recipient} recipientEmail={recipientEmail}/>
-            <p>{recipientEmail}</p>
+            {
+                conversationUsers.length <= 2 ? 
+                <>
+                    <RecipientAvatar recipient={recipient} recipientEmail={recipientEmail}/>
+                    <p>{recipientEmail}</p>
+                </>
+                :
+                <AvatarGroup total={conversationUsers.length}>
+                    <Avatar alt="Remy Sharp" src="" />
+                    <Avatar alt="Travis Howard" src="" />
+                </AvatarGroup>
+            }
+            
         </StyledContainer>
     )
 }

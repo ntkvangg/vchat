@@ -1,4 +1,4 @@
-import { Avatar, Box, Card, CardActions, CardMedia, Modal } from "@mui/material";
+import { Avatar, Box, Card, CardActions, CardMedia, Modal, Tooltip } from "@mui/material";
 import { useAuthState } from "react-firebase-hooks/auth";
 import styled from "styled-components";
 import { auth, storage } from "../config/firebase";
@@ -16,6 +16,7 @@ import wordIcon from "../assets/icon/word.png";
 import { getStorage, getDownloadURL, ref } from 'firebase/storage';
 import ReactPlayer from "react-player";
 import { useState } from "react";
+import { getAccountInConversation } from '../utils/getRecipentEmail';
 
 const StyledMessage = styled.div`
     word-break: break-all;
@@ -94,6 +95,7 @@ const StyledCardMedia = styled(CardMedia)`
 const SingleMessage = ({message, conversation}: {message: IMessage, conversation: Conversation}) => {
     const [loggedInUer, loading, error] = useAuthState(auth);
     const conversationUser = conversation.users;
+    
     const {recipient, recipientEmail} = useRecipient(conversationUser);
     const [selectedImage, setSelectedIamge] = useState("");
     const [isOpenModal, setIsOpenModal] = useState(false);
@@ -205,7 +207,7 @@ const SingleMessage = ({message, conversation}: {message: IMessage, conversation
         setIsOpenModal(!isOpenModal);
     }
 
-  
+    
 
     
 
@@ -226,7 +228,7 @@ const SingleMessage = ({message, conversation}: {message: IMessage, conversation
                             }
                             <StyledTimestamp>{message.send_at}</StyledTimestamp>
                         </StyledSenderMessage> : 
-                        message.file.type && checkTypeFile(message.file.type) ?
+                            message.file.type && checkTypeFile(message.file.type) ?
                         <StyledMediaWrapper onClick={seeImage}> 
                             <CardMedia component="img" image={message.file.url || ''} alt={message.file.name || ''} height="210" id="imgMessage"/>
                             <CardActions sx={{justifyContent: 'flex-end', padding: '5px'}}>
@@ -244,10 +246,11 @@ const SingleMessage = ({message, conversation}: {message: IMessage, conversation
                 </StyledSendMessageWrapper>
                 :
                 <StyledReciveMessageWrapper >
-                    <Avatar src={recipient?.photoURL}/>
+                    <Tooltip title={message.user} placement="right">
+                        <Avatar src={getAccountInConversation(conversationUser, message.user)?.photoURL || ""} alt=""/>
+                    </Tooltip>
                     { message.text ?  
                         <StyledReciveMessage>
-                           
                             {checkYoutubeUrl(message.text) ? 
                                 <div className="react-player">
                                     <ReactPlayer url={message.text} className="reactPlayer"/>
@@ -259,7 +262,7 @@ const SingleMessage = ({message, conversation}: {message: IMessage, conversation
                             }
                             <StyledTimestamp>{message.send_at}</StyledTimestamp>
                         </StyledReciveMessage>:
-                        message.file.type && checkTypeFile(message.file.type) ?
+                            message.file.type && checkTypeFile(message.file.type) ?
                         <StyledMediaWrapper onClick={seeImage}> 
                             <CardMedia component="img" image={message.file.url || ''} alt={message.file.name || ''} height="210" id="imgMessage"/>
                                 <CardActions sx={{justifyContent: 'flex-end', padding: '5px'}}>
