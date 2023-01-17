@@ -16,17 +16,4 @@ export const transforMessage = (message: QueryDocumentSnapshot<DocumentData>)=>{
 
 export const convertFirestoreTimestampToString = (timestamp: Timestamp)=> new Date(timestamp.toDate().getTime()).toLocaleString()
 
-export const getAccountInConversation = async(conversationUser: Conversation['users'], email: string)=>{
-    const userAccount = conversationUser.find(userEmail => userEmail === email);
-    if(userAccount){
-        const docRef = doc(db, "users", userAccount);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-            return docSnap.data() as AppUser | undefined
-        }
-    }
-    
-    return {}
-}
-
 export const getAccountEmail = (conversationUsers: Conversation['users'], userEmail: string)=> conversationUsers.find(email=>email === userEmail);

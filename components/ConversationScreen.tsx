@@ -13,18 +13,18 @@ import SingleMessage from './SingleMessage';
 import SendIcon from '@mui/icons-material/Send';
 import MicIcon from '@mui/icons-material/Mic';
 import MoodIcon from '@mui/icons-material/Mood';
-import { addDoc, collection, doc, query, serverTimestamp, setDoc, where,updateDoc  } from 'firebase/firestore';
+import { addDoc, collection, doc, query, serverTimestamp, setDoc, where,updateDoc, getDoc, getDocs  } from 'firebase/firestore';
 import { auth, db, storage } from '../config/firebase';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import PhotoOutlinedIcon from '@mui/icons-material/PhotoOutlined';
-import { Avatar, Card, OutlinedInput, FormControl, Dialog, DialogTitle, DialogContent, DialogContentText, TextField, DialogActions, Button, Stack, Checkbox, Badge, Input } from '@mui/material';
+import { Avatar, Card, OutlinedInput, FormControl, Dialog, DialogTitle, DialogContent, DialogContentText, TextField, DialogActions, Button, Stack, Checkbox, Badge, Input, InputAdornment } from '@mui/material';
 import {getDownloadURL, getStorage, ref, uploadBytes, uploadBytesResumable} from 'firebase/storage';
 import EmojiPicker from 'emoji-picker-react';
 import FilterIcon from '@mui/icons-material/Filter';
 import GroupAddIcon from '@mui/icons-material/GroupAdd';
 import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
-import CloseIcon from '@mui/icons-material/Close';
+import SearchIcon from '@mui/icons-material/Search';
 
 interface File {
     name: String;
@@ -118,6 +118,8 @@ const StyledAvatar = styled(Avatar)`
 const StyledChoseUser = styled.div`
     display: flex;
     justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
 
 `
 const label = { inputProps: { 'aria-label': 'Checkbox demo' } };
@@ -131,8 +133,10 @@ const ConversationScreen = ({conversation, messages}: {conversation: Conversatio
     const [emojies, setEmojies] = useState(Array<any>([]));
     const [isOpenAddGroup, setIsOpenAddGroup] = useState(false);
     const [searchPeople, setSearchPeople] = useState("");
-    const [selectedUsers, setSelectedUsers] = useState(Array<Conversation['users']>);
+    const [selectedUsers, setSelectedUsers] = useState(Array<any>([]));
     const [isDisabledAddGroup, setIsDisabledAddGroup] = useState(true);
+    const [userList, setUserList]= useState(Array<any>([]));
+    const [usersListDefault, setUsersListDefault] = useState(Array<any>([]));
 
     let icons: any[] = [];
 
@@ -239,7 +243,7 @@ const ConversationScreen = ({conversation, messages}: {conversation: Conversatio
     const [messagesSnapshot, messagesLoading, error]  = useCollection(queryGetMessages);
     const queryGetConversationForCurrentUser = query(collection(db, 'conversation'), where('users', 'array-contains', loggedInUser?.email))
     const [conversationSnapshot, __loading, __error]= useCollection(queryGetConversationForCurrentUser);
-
+    
 
 
     const showMessages = ()=>{
@@ -264,6 +268,13 @@ const ConversationScreen = ({conversation, messages}: {conversation: Conversatio
     }
 
     const closeAddGroupDialog = async()=>{
+        setIsOpenAddGroup(false);
+        setSelectedUsers([]);
+        setIsDisabledAddGroup(true);
+
+    }
+
+    const addMemberToGroup = async()=>{
         const memberOrigin = [loggedInUser?.email, recipientEmail];
         const newMembers:any[] = [];
         const conversationRef = doc(db, "conversation", conversationId as string);
@@ -276,23 +287,27 @@ const ConversationScreen = ({conversation, messages}: {conversation: Conversatio
                 users: groups
             });
         }catch(error){console.log(error);}
-        setIsOpenAddGroup(false);
+        closeAddGroupDialog();
     }
 
     const onChangeSearchContact = (e: any)=>{
         setSearchPeople(e.target.value);
+        setUserList(()=>{
+            if(!e.target.value)return usersListDefault;
+            return userList.filter(item=> item.indexOf(e.target.value) !== -1);
+        })
     }
 
     const addGroup = (isOpen: boolean)=>{
         setIsOpenAddGroup(isOpen);
     }
 
-    const onChangeSelectedUser = (e: any, contact: Conversation['users'])=>{
+    const onChangeSelectedUser = (e: any, email: string)=>{
         if(e.target.checked) {
-           selectedUsers.push(contact);
+           selectedUsers.push(email);
         }else{
             selectedUsers.forEach((item, index)=>{
-                if(item[0] === contact[0]){
+                if(item === email){
                     selectedUsers.splice(index, 1);
                 }
             })
@@ -303,6 +318,23 @@ const ConversationScreen = ({conversation, messages}: {conversation: Conversatio
 
     useEffect(()=>{
         scrollToBottom();
+        const getUsers = async()=>{
+            const queryGetConversationForCurrentUser = query(collection(db, 'conversation'), where('users', 'array-contains', loggedInUser?.email));
+            const userSnapshot = await getDocs(queryGetConversationForCurrentUser);
+            const users: any = [];
+            userSnapshot.forEach(doc=>{
+                doc.data().users.forEach((user: any)=>{
+                    if(user !== loggedInUser?.email){
+                        users.push(user);
+                    }
+                })
+            });
+            const usersRemoveDuplicate =  users.filter((item: any, index: number)=>users.indexOf(item) === index)
+            setUserList(usersRemoveDuplicate);
+            setUsersListDefault(usersRemoveDuplicate);
+            
+        }
+        getUsers();
     }, [conversationId])
     
     return (
@@ -356,18 +388,30 @@ const ConversationScreen = ({conversation, messages}: {conversation: Conversatio
                         id="search-people"
                         placeholder='Search people'
                         value={searchPeople}
+                        variant="standard"
+                        InputProps={{
+                            startAdornment:(
+                                <InputAdornment position="start">
+                                    <SearchIcon />
+                                </InputAdornment>
+                            )
+                        }}
                         onChange={(e)=>onChangeSearchContact(e)}
                         fullWidth
+                        sx={{marginBottom: 2}}
                     />
                     <div>
                         {
-                            conversationSnapshot?.docs.map(contact=>{
+                            userList.map(email=>{
                                 return(
-                                    <StyledChoseUser key={contact.id}>
-                                        <AvatarGroup user={(contact.data() as Conversation).users}/>
+                                    <StyledChoseUser key={email}>
+                                        <Stack direction="row" spacing={1} sx={{alignItems: 'center'}}>
+                                            <Avatar src=""/>
+                                            <p>{email}</p>
+                                        </Stack>
                                         <Checkbox
                                             {...label}
-                                            onChange={(e)=>{onChangeSelectedUser(e, (contact.data() as Conversation).users)}}
+                                            onChange={(e)=>{onChangeSelectedUser(e, email)}}
                                             icon={<RadioButtonUncheckedIcon />}
                                             checkedIcon={<CheckCircleOutlineIcon />}
                                         />
@@ -378,7 +422,7 @@ const ConversationScreen = ({conversation, messages}: {conversation: Conversatio
                     </div>
                 </DialogContent>
                 <DialogActions sx={{justifyContent: 'center'}}>
-                    <Button onClick={closeAddGroupDialog} variant="contained" color="secondary" disabled={isDisabledAddGroup}>Done</Button>
+                    <Button onClick={addMemberToGroup} variant="contained" color="secondary" disabled={isDisabledAddGroup}>Done</Button>
                 </DialogActions>
             </Dialog>
         </>
@@ -390,9 +434,7 @@ const ConversationScreen = ({conversation, messages}: {conversation: Conversatio
 
 const AvatarGroup =({user}: {user: Conversation['users']})=>{
     const {recipient, recipientEmail} = useRecipient(user);
-    
     return (
-        
         <Stack direction="row" spacing={1} sx={{alignItems: "center"}}>
             <RecipientAvatar recipient={recipient} recipientEmail={recipientEmail}/>
             <p>{recipientEmail}</p>
@@ -402,10 +444,5 @@ const AvatarGroup =({user}: {user: Conversation['users']})=>{
     )
 }
 
-const SelectedUser = ({selectedUser}: {selectedUser: Conversation['users']}) =>{
-    const {recipient, recipientEmail} = useRecipient(selectedUser);
-    return <RecipientAvatar recipient={recipient} recipientEmail={recipientEmail}/>
-        
-}
 
 export default ConversationScreen

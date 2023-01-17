@@ -25,8 +25,5 @@ export const useRecipient = (conversationUsers: Conversation['users'])=>{
     }
 }
 
-export const useAccount = (conversationUsers: Conversation['users'], userEmail: string)=>{
-   
-}
 
 

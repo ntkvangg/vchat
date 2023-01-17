@@ -4,7 +4,7 @@ import { useRecipient } from '../hooks/useRecipent';
 import {Conversation} from '../types';
 import { RecipientAvatar } from './RecipientAvatar';
 import Box from '@mui/material/Box';
-import { AvatarGroup, Badge } from '@mui/material';
+import { AvatarGroup, Badge, Tooltip } from '@mui/material';
 import Avatar from '@mui/material/Avatar';
 
 
@@ -65,8 +65,12 @@ const ConversationSelect = ({id, conversationUsers} : { id: string, conversation
                 </>
                 :
                 <AvatarGroup total={conversationUsers.length}>
-                    <Avatar alt="Remy Sharp" src="" />
-                    <Avatar alt="Travis Howard" src="" />
+                    <Tooltip title={conversationUsers[0]} placement="bottom">
+                        <Avatar alt="Remy Sharp" src="" />
+                    </Tooltip>
+                    <Tooltip title={conversationUsers[1]} placement="bottom">
+                        <Avatar alt="Remy Sharp" src="" />
+                    </Tooltip>
                 </AvatarGroup>
             }
             

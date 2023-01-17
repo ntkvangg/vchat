@@ -1,9 +1,9 @@
 import { Avatar, Box, Card, CardActions, CardMedia, Modal, Tooltip } from "@mui/material";
 import { useAuthState } from "react-firebase-hooks/auth";
 import styled from "styled-components";
-import { auth, storage } from "../config/firebase";
+import { auth, db, storage } from "../config/firebase";
 import { useRecipient } from "../hooks/useRecipent";
-import {Conversation, IMessage} from "../types";
+import {AppUser, Conversation, IMessage} from "../types";
 import DownloadOutlinedIcon from '@mui/icons-material/DownloadOutlined';
 import IconButton from '@mui/material/IconButton';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
@@ -15,8 +15,9 @@ import pptIcon from "../assets/icon/powerpoint.png";
 import wordIcon from "../assets/icon/word.png";
 import { getStorage, getDownloadURL, ref } from 'firebase/storage';
 import ReactPlayer from "react-player";
-import { useState } from "react";
-import { getAccountInConversation } from '../utils/getRecipentEmail';
+import { useState, useEffect } from "react";
+import {getAccountEmail } from '../utils/getRecipentEmail';
+import { doc, getDoc } from "firebase/firestore";
 
 const StyledMessage = styled.div`
     word-break: break-all;
@@ -95,10 +96,29 @@ const StyledCardMedia = styled(CardMedia)`
 const SingleMessage = ({message, conversation}: {message: IMessage, conversation: Conversation}) => {
     const [loggedInUer, loading, error] = useAuthState(auth);
     const conversationUser = conversation.users;
-    
+    const [avatarInConversation, setAvatarInConversation] = useState("");
     const {recipient, recipientEmail} = useRecipient(conversationUser);
+    // const {user, emailInConversation}= useAccountInConversation(conversationUser, message.user);
     const [selectedImage, setSelectedIamge] = useState("");
     const [isOpenModal, setIsOpenModal] = useState(false);
+
+
+    useEffect(()=>{
+        const emailInConversation = getAccountEmail(conversationUser, message.user);
+        const getUserInconversation = async ()=>{
+            const docRef = doc(db, "users", emailInConversation as string);
+            const docSnap = await getDoc(docRef);
+            if (docSnap.exists()) {
+                setAvatarInConversation((docSnap.data() as AppUser).photoURL)
+
+            }
+        }
+        if(emailInConversation){
+            getUserInconversation();
+        }
+
+        
+    }, [message.user])
 
     const checkTypeFile = (type: String)=>{
         if(!type) return false;
@@ -247,7 +267,7 @@ const SingleMessage = ({message, conversation}: {message: IMessage, conversation
                 :
                 <StyledReciveMessageWrapper >
                     <Tooltip title={message.user} placement="right">
-                        <Avatar src={getAccountInConversation(conversationUser, message.user)?.photoURL || ""} alt=""/>
+                        <Avatar src={avatarInConversation} alt=""/>
                     </Tooltip>
                     { message.text ?  
                         <StyledReciveMessage>
