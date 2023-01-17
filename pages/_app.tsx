@@ -46,6 +46,7 @@ export default function App({ Component, pageProps }: AppProps) {
 
     if(loggedInUser){
       setUserInDb();
+      setIsLoggedInConversation(loggedInUser);
     }
 
     if(conversationId){
